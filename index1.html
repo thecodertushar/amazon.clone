@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Amazon.in Clone</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <style>
+    body { font-family: Arial, sans-serif; background: #eaeded; }
+
+    /* ── NAV ── */
+    .amz-nav { background: #131921; padding: 8px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: sticky; top: 0; z-index: 200; }
+    .amz-logo { font-size: 22px; font-weight: 700; color: #ff9900; letter-spacing: -1px; white-space: nowrap; cursor: pointer; }
+    .amz-logo span { color: #fff; }
+    .amz-search { flex: 1; display: flex; min-width: 200px; border-radius: 4px; overflow: hidden; }
+    .amz-search select { background: #f3f3f3; border: none; padding: 0 8px; font-size: 12px; color: #333; }
+    .amz-search input { flex: 1; border: none; padding: 8px 10px; font-size: 14px; outline: none; }
+    .amz-search button { background: #ff9900; border: none; padding: 0 14px; font-size: 18px; color: #131921; font-weight: 700; cursor: pointer; }
+    .amz-search button:hover { background: #e88b00; }
+    .amz-nav-actions { display: flex; gap: 14px; align-items: center; }
+    .amz-nav-action { color: #fff; font-size: 12px; cursor: pointer; text-align: center; white-space: nowrap; }
+    .amz-nav-action:hover { text-decoration: underline; }
+    .amz-nav-action .main { font-size: 13px; font-weight: 700; }
+    .amz-cart-icon { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .amz-cart-count { color: #ff9900; font-weight: 700; font-size: 18px; }
+
+    /* ── SUBNAV ── */
+    .amz-subnav { background: #232f3e; padding: 6px 14px; display: flex; gap: 16px; overflow-x: auto; }
+    .amz-subnav a { color: #fff; font-size: 13px; white-space: nowrap; cursor: pointer; text-decoration: none; padding: 2px 0; }
+    .amz-subnav a:hover { text-decoration: underline; }
+
+    /* ── HERO ── */
+    .amz-hero { height: 200px; background: linear-gradient(135deg,#1a2980,#26d0ce); display: flex; align-items: center; justify-content: center; }
+    .amz-hero h2 { font-size: 26px; font-weight: 700; color: #fff; }
+    .amz-hero p { font-size: 14px; color: rgba(255,255,255,.85); margin-top: 6px; }
+    .amz-hero-btn { margin-top: 14px; background: #ff9900; color: #131921; border: none; padding: 10px 24px; border-radius: 4px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .amz-hero-btn:hover { background: #e88b00; }
+
+    /* ── DEPT BAR ── */
+    .dept-bar { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .dept-label { font-size: 13px; font-weight: 700; color: #0f1111; margin-right: 6px; white-space: nowrap; }
+    .dept-btn { font-size: 13px; padding: 5px 14px; cursor: pointer; color: #007185; border: 1px solid #ddd; border-radius: 20px; background: #f7f7f7; white-space: nowrap; transition: background .15s; }
+    .dept-btn:hover, .dept-btn.active { background: #ff9900; color: #131921; border-color: #ff9900; font-weight: 600; }
+
+    /* ── CATEGORY CARDS (Bootstrap rows) ── */
+    .section-heading { font-size: 20px; font-weight: 700; color: #0f1111; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 2px solid #ff9900; display: inline-block; }
+    .cat-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; cursor: pointer; transition: box-shadow .18s, transform .18s; height: 100%; display: flex; flex-direction: column; }
+    .cat-card:hover { box-shadow: 0 6px 22px rgba(0,0,0,.13); transform: translateY(-3px); }
+    .cat-card img { width: 100%; height: 160px; object-fit: cover; display: block; background: #f7f7f7; }
+    .cat-card-body { padding: 10px 12px 14px; flex: 1; display: flex; flex-direction: column; }
+    .cat-name { font-size: 14px; font-weight: 700; color: #0f1111; margin-bottom: 3px; }
+    .cat-sub { font-size: 12px; color: #007185; margin-bottom: 8px; }
+    .cat-shop-link { font-size: 12px; color: #c7511f; font-weight: 600; margin-top: auto; }
+    .cat-shop-link:hover { text-decoration: underline; }
+    .cat-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-bottom: 6px; display: inline-block; }
+    .badge-sale { background: #cc0c39; color: #fff; }
+    .badge-new  { background: #067d62; color: #fff; }
+    .badge-hot  { background: #ff6b00; color: #fff; }
+
+    /* ---- CART SIDEBAR ----*/
+    .cart-sidebar { position: fixed; right: 0; top: 0; height: 100%; width: 310px; background: #fff; border-left: 1px solid #ddd; z-index: 999; transform: translateX(100%); transition: transform .25s; overflow-y: auto; padding: 16px; }
+    .cart-sidebar.open { transform: translateX(0); }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+    .cart-item { display: flex; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+    .cart-item img { width: 54px; height: 54px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+    .cart-item-name { font-size: 12px; font-weight: 500; color: #0f1111; }
+    .cart-item-price { font-size: 13px; color: #c7511f; font-weight: 600; margin-top: 2px; }
+    .cart-remove { background: none; border: none; color: #007185; font-size: 11px; cursor: pointer; margin-top: 4px; }
+    .checkout-btn { width: 100%; background: #ff9900; border: none; border-radius: 20px; padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 14px; color: #131921; }
+
+    /* ---- TOAST ---- */
+    .amz-toast { position: fixed; top: 70px; right: 20px; background: #007600; color: #fff; padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 1000; }
+    .amz-toast.show { opacity: 1; }
+
+    /* ---- DETAIL PAGE ---- */
+    #detailPage { display: none; background: #eaeded; min-height: 100vh; }
+    .detail-breadcrumb { background: #fff; padding: 10px 20px; font-size: 13px; color: #007185; cursor: pointer; border-bottom: 1px solid #ddd; }
+    .detail-breadcrumb:hover { text-decoration: underline; }
+    .detail-wrap { max-width: 1140px; margin: 0 auto; padding: 20px 14px; }
+    .detail-top { display: grid; grid-template-columns: 380px 1fr 270px; gap: 20px; }
+    .detail-img-box { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 14px; }
+    .detail-main-img { width: 100%; height: 330px; object-fit: contain; background: #f7f7f7; border-radius: 6px; display: block; }
+    .detail-thumb-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .detail-thumb { width: 58px; height: 58px; object-fit: cover; border-radius: 4px; border: 2px solid #ddd; cursor: pointer; }
+    .detail-thumb.sel { border-color: #ff9900; }
+    .detail-center { display: flex; flex-direction: column; gap: 14px; }
+    .detail-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    .detail-title { font-size: 19px; font-weight: 700; color: #0f1111; line-height: 1.4; }
+    .detail-brand { font-size: 13px; color: #007185; margin-top: 4px; }
+    .detail-stars { color: #ff9900; font-size: 15px; }
+    .detail-rev { font-size: 13px; color: #007185; }
+    .detail-price { font-size: 28px; font-weight: 700; color: #0f1111; }
+    .detail-mrp { font-size: 13px; color: #888; text-decoration: line-through; margin-left: 8px; }
+    .detail-disc { font-size: 13px; color: #cc0c39; font-weight: 600; margin-left: 4px; }
+    .detail-prime-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 14px; background: #e8f4fd; border-radius: 20px; font-size: 12px; color: #007185; }
+    .detail-prime-b { background: #00a8e1; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 2px; }
+    .detail-buy-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; align-self: start; }
+    .detail-buy-btn { width: 100%; background: #ff9900; border: none; border-radius: 20px; padding: 10px 0; font-size: 14px; font-weight: 700; cursor: pointer; color: #131921; margin-bottom: 8px; }
+    .detail-buy-btn:hover { background: #e88b00; }
+    .detail-cart-btn { width: 100%; background: #ffd814; border: none; border-radius: 20px; padding: 10px 0; font-size: 14px; font-weight: 700; cursor: pointer; color: #131921; }
+    .detail-cart-btn:hover { background: #f7ca00; }
+    .detail-specs-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 14px; }
+    .detail-specs-card h3 { font-size: 15px; font-weight: 700; color: #0f1111; margin-bottom: 10px; }
+    .spec-row { display: flex; padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .spec-key { width: 160px; color: #666; flex-shrink: 0; font-weight: 500; }
+    .spec-val { color: #0f1111; }
+    .detail-desc-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 14px; }
+    .detail-desc-card h3 { font-size: 15px; font-weight: 700; color: #0f1111; margin-bottom: 10px; }
+    .detail-desc-card p { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 10px; }
+    .detail-desc-card ul { padding-left: 20px; }
+    .detail-desc-card ul li { font-size: 14px; color: #333; margin-bottom: 6px; line-height: 1.6; }
+
+    .amz-footer { background: #232f3e; color: #ccc; text-align: center; font-size: 12px; padding: 18px; margin-top: 24px; }
+    .amz-footer a { color: #ccc; margin: 0 8px; text-decoration: none; }
+
+    @media (max-width: 900px) { .detail-top { grid-template-columns: 1fr; } .detail-main-img { height: 240px; } }
+  
+    .foot-logo{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        background-color: black;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="amz-toast">Added to cart!</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <span style="font-size:16px;font-weight:700;color:#0f1111">Your Cart</span>
+    <button onclick="toggleCart()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#555">✕</button>
+  </div>
+  <div id="cartItems"></div>
+  <div id="cartTotal" style="font-size:14px;font-weight:700;color:#0f1111;margin-top:8px;"></div>
+  <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+</div>
+
+<!-- STICKY NAV -->
+<nav class="amz-nav">
+  <div class="amz-logo" onclick="goHome()">ama<span>z</span>on.in</div>
+  <div class="amz-search">
+    <select><option>All</option><option>Electronics</option><option>Books</option><option>Fashion</option><option>Home</option><option>Sports</option><option>Toys</option></select>
+    <input type="text" placeholder="Search Amazon.in" id="searchInput" oninput="liveSearch()" />
+    <button>&#128269;</button>
+  </div>
+  <div class="amz-nav-actions">
+    <div class="amz-nav-action"><div>Hello, Sign in</div><div class="main">Account &amp; Lists</div></div>
+    <div class="amz-nav-action"><div>Returns</div><div class="main">&amp; Orders</div></div>
+    <div class="amz-cart-icon" onclick="toggleCart()">
+      <span style="font-size:22px;color:#fff">&#128722;</span>
+      <span class="amz-cart-count" id="cartCount">0</span>
+      <span class="main" style="font-size:13px;font-weight:700;color:#fff">Cart</span>
+    </div>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="homePage">
+  <div class="amz-subnav">
+    <a onclick="showCategory('all')">All</a>
+    <a onclick="showCategory('phones')">Phones</a>
+    <a onclick="showCategory('laptops')">Laptops</a>
+    <a onclick="showCategory('fashion')">Fashion</a>
+    <a onclick="showCategory('electronics')">Electronics</a>
+    <a onclick="showCategory('furniture')">Furniture</a>
+    <a onclick="showCategory('sports')">Sports</a>
+    <a onclick="showCategory('books')">Books</a>
+    <a onclick="showCategory('audio')">Audio</a>
+  </div>
+
+  <div class="amz-hero text-center">
+    <div>
+      <h2>Mega Deals — Up to 70% Off</h2>
+      <p>Limited time offers across thousands of products</p>
+      <button class="amz-hero-btn" onclick="showCategory('all')">Shop Now</button>
+    </div>
+  </div>
+
+  <div class="container-fluid px-3 px-md-4 py-3" style="max-width:1200px;margin:auto;">
+
+    <!-- DEPT BAR -->
+    <div class="dept-bar">
+      <span class="dept-label">Department:</span>
+      <button class="dept-btn active" onclick="setDept(this,'all')">All</button>
+      <button class="dept-btn" onclick="setDept(this,'phones')">Phones</button>
+      <button class="dept-btn" onclick="setDept(this,'laptops')">Laptops &amp; Computers</button>
+      <button class="dept-btn" onclick="setDept(this,'fashion')">Fashion</button>
+      <button class="dept-btn" onclick="setDept(this,'electronics')">Electronics</button>
+      <button class="dept-btn" onclick="setDept(this,'furniture')">Furniture</button>
+      <button class="dept-btn" onclick="setDept(this,'sports')">Sports</button>
+      <button class="dept-btn" onclick="setDept(this,'books')">Books</button>
+      <button class="dept-btn" onclick="setDept(this,'audio')">Audio</button>
+    </div>
+
+    <!-- SEARCH RESULTS (hidden by default) -->
+    <div id="searchResults" style="display:none;">
+      <div class="section-heading mb-3">Search Results</div>
+      <div class="row g-3" id="searchGrid"></div>
+    </div>
+
+    <!-- FEATURED CATEGORIES -->
+     
+    <div id="featuredSection">
+      <div class="section-heading">Featured Categories</div>
+
+      <!-- ROW 1 -->
+      <p class="fw-semibold text-secondary mb-2" style="font-size:13px;">&#128241; Gadgets &amp; Fashion</p>
+      <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('phones')">
+            <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80" alt="Phones"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-hot">Hot</span>
+              <div class="cat-name">Phones</div>
+              <div class="cat-sub">Smartphones, Accessories</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('laptops')">
+            <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80" alt="Laptops"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-new">New</span>
+              <div class="cat-name">Laptops &amp; Computers</div>
+              <div class="cat-sub">MacBook, Windows, Gaming</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('fashion')">
+            <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=500&q=80" alt="Clothes"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-sale">Sale</span>
+              <div class="cat-name">Clothes &amp; Fashion</div>
+              <div class="cat-sub">Men, Women, Kids</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('electronics')">
+            <img src="https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80" alt="Electronics"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-hot">Hot</span>
+              <div class="cat-name">Electronics</div>
+              <div class="cat-sub">TVs, Cameras, Smart Devices</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ROW 1 -->
+
+      <!-- ROW 2 -->
+      <p class="fw-semibold text-secondary mb-2" style="font-size:13px;">&#127968; Home &amp; Lifestyle</p>
+      <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('furniture')">
+            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80" alt="Sofa & Bed"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-sale">Up to 60% off</span>
+              <div class="cat-name">Sofa Set &amp; Bed</div>
+              <div class="cat-sub">Living Room, Bedroom</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('home')">
+            <img src="https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=500&q=80" alt="Pillow"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-new">New Arrivals</span>
+              <div class="cat-name">Pillow &amp; Bedding</div>
+              <div class="cat-sub">Cushions, Blankets, Sheets</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('shoes')">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80" alt="Shoes & Socks"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-sale">Sale</span>
+              <div class="cat-name">Shoes &amp; Socks</div>
+              <div class="cat-sub">Sneakers, Formal, Sports</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('watches')">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80" alt="Watches"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-hot">Trending</span>
+              <div class="cat-name">Watches</div>
+              <div class="cat-sub">Analog, Digital, Smart</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ROW 2 -->
+
+      <!-- ROW 3 -->
+      <p class="fw-semibold text-secondary mb-2" style="font-size:13px;">&#128141; Style &amp; Wellness</p>
+      <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('jewellery')">
+            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80" alt="Jewellery"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-new">New</span>
+              <div class="cat-name">Jewellery</div>
+              <div class="cat-sub">Rings, Necklaces, Earrings</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('sports')">
+            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&q=80" alt="Fitness & Sports"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-hot">Hot</span>
+              <div class="cat-name">Fitness &amp; Sports</div>
+              <div class="cat-sub">Dumbbells, Yoga, Running</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('accessories')">
+            <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=500&q=80" alt="Accessories & Tech"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-sale">Deals</span>
+              <div class="cat-name">Accessories &amp; Tech</div>
+              <div class="cat-sub">Bags, Chargers, Cables</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('books')">
+            <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&q=80" alt="Books"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-new">Bestsellers</span>
+              <div class="cat-name">Books</div>
+              <div class="cat-sub">Fiction, Self-Help, Education</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ROW 3 -->
+
+      <!-- ROW 4 -->
+      <p class="fw-semibold text-secondary mb-2" style="font-size:13px;">&#127925; Entertainment &amp; Home</p>
+      <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('audio')">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80" alt="Audio"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-hot">Hot</span>
+              <div class="cat-name">Audio &amp; Accessories</div>
+              <div class="cat-sub">Headphones, Speakers, Earbuds</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('kitchen')">
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&q=80" alt="Home & Kitchen"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-sale">Up to 50% off</span>
+              <div class="cat-name">Home &amp; Kitchen</div>
+              <div class="cat-sub">Cookware, Appliances, Décor</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('furniture')">
+            <img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80" alt="Furniture & Storage"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-new">New</span>
+              <div class="cat-name">Furniture &amp; Storage</div>
+              <div class="cat-sub">Shelves, Wardrobes, Cabinets</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <div class="cat-card" onclick="showCategory('toys')">
+            <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&q=80" alt="Games & Fun"/>
+            <div class="cat-card-body">
+              <span class="cat-badge badge-hot">Kids Love</span>
+              <div class="cat-name">Games &amp; Fun</div>
+              <div class="cat-sub">LEGO, Board Games, Puzzles</div>
+              <span class="cat-shop-link">Shop now &rsaquo;</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ROW 4 -->
+
+    </div><!-- /featuredSection -->
+
+    <!-- PRODUCT LISTING (shown on category click) -->
+    <div id="productListing" style="display:none;">
+      <div class="d-flex align-items-center mb-3 gap-3">
+        <button class="btn btn-sm btn-outline-secondary" onclick="backToFeatured()">&#8592; Back</button>
+        <span class="section-heading mb-0" id="listingTitle" style="border:none;padding:0;"></span>
+      </div>
+      <div class="row g-3" id="productGrid"></div>
+    </div>
+
+  </div><!-- /container -->
+
+  <div class="amz-footer">
+    <div class="mb-2"><a href="#">Conditions of Use</a><a href="#">Privacy Notice</a><a href="#">Help</a></div>
+    <div style="color:#666;">© 1996–2026, Amazon.in clone built with Claude</div>
+  </div>
+</div><!-- /homePage -->
+
+<!-- DETAIL PAGE -->
+<div id="detailPage">
+  <div class="detail-breadcrumb" onclick="goBackFromDetail()">&#8592; Back to results</div>
+  <div class="detail-wrap">
+    <div class="detail-top" id="detailTop"></div>
+    <div id="detailBottom"></div>
+  </div>
+  <div class="amz-footer"><div style="color:#666;">© 1996–2026, Amazon.in clone built with Claude</div></div>
+</div>
+
+<script>
+/* ──────────────────── DATA ──────────────────── */
+const products = [
+  { id:1,  name:"Apple MacBook Air 13-inch M2", brand:"Apple", price:89990, mrp:109900, rating:4.8, reviews:14320, cat:["laptops","electronics"],
+    img:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=120","https://images.unsplash.com/photo-1611186871525-b99ddcd55e4c?w=120","https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=120"],
+    prime:true, deal:true,
+    description:"The MacBook Air with M2 chip delivers extraordinary performance in a thin, light design. Up to 18-hour battery life, blazing-fast M2 chip — perfect for work, study, and creativity.",
+    features:["Apple M2 8-core CPU + 8-core GPU","13.6-inch Liquid Retina 500-nit display","8GB unified memory, 256GB SSD","Up to 18 hours battery","MagSafe 3 + two Thunderbolt/USB4 ports","1080p FaceTime HD camera"],
+    specs:[["Brand","Apple"],["Processor","Apple M2"],["RAM","8 GB"],["Storage","256 GB SSD"],["Display","13.6-inch Liquid Retina"],["Battery","Up to 18 hours"],["OS","macOS Ventura"],["Weight","1.24 kg"]]
+  },
+  { id:2,  name:"Sony WH-1000XM5 Noise Cancelling Headphones", brand:"Sony", price:24990, mrp:34990, rating:4.7, reviews:28430, cat:["audio","electronics","accessories"],
+    img:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120","https://images.unsplash.com/photo-1583394838336-acd977736f90?w=120","https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=120"],
+    prime:true, deal:false,
+    description:"Industry-leading noise cancellation with 8 microphones and 2 processors. 30-hour battery, multipoint connection, and crystal-clear calls.",
+    features:["8-mic noise cancellation","30-hour battery (3 min charge = 3 hrs)","Multipoint dual-device connection","Speak-to-Chat auto-pause","USB-C charging, foldable design"],
+    specs:[["Brand","Sony"],["Connectivity","Bluetooth 5.2"],["Battery","30 hours"],["Weight","250 g"],["Charging","USB-C"],["Colors","Black, Platinum Silver"]]
+  },
+  { id:3,  name:"Samsung Galaxy S24 Ultra 5G 256GB", brand:"Samsung", price:129999, mrp:149999, rating:4.7, reviews:9812, cat:["phones","electronics"],
+    img:"https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=120","https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=120","https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=120"],
+    prime:true, deal:true,
+    description:"Galaxy S24 Ultra with built-in S Pen, 200MP camera, titanium frame and Snapdragon 8 Gen 3 — the pinnacle of Android.",
+    features:["200MP + 50MP 5x telephoto camera","Built-in S Pen","Titanium frame, Gorilla Glass Armor","6.8-inch AMOLED 2X 120Hz","5000mAh, 45W fast charge","Snapdragon 8 Gen 3"],
+    specs:[["Brand","Samsung"],["Processor","Snapdragon 8 Gen 3"],["RAM","12 GB"],["Storage","256 GB"],["Display","6.8-inch AMOLED 120Hz"],["Battery","5000 mAh"],["5G","Yes"]]
+  },
+  { id:4,  name:"Atomic Habits — James Clear (Paperback)", brand:"Penguin Random House", price:299, mrp:599, rating:4.9, reviews:210345, cat:["books"],
+    img:"https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=120","https://images.unsplash.com/photo-1512820790803-83ca734da794?w=120","https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=120"],
+    prime:true, deal:true,
+    description:"#1 NYT Bestseller — 15M+ copies sold. Practical 4-step framework for building good habits and breaking bad ones.",
+    features:["#1 NYT Bestseller","4-step: Cue, Craving, Response, Reward","Real-world athlete & business examples","Habit tracker worksheets included"],
+    specs:[["Author","James Clear"],["Publisher","Penguin Random House"],["Pages","319"],["Format","Paperback"],["Language","English"]]
+  },
+  { id:5,  name:"The Psychology of Money — Morgan Housel", brand:"Jaico Publishing", price:249, mrp:499, rating:4.8, reviews:98765, cat:["books"],
+    img:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=120","https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=120","https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=120"],
+    prime:true, deal:false,
+    description:"19 timeless lessons on wealth, greed, and happiness. Bestseller in 60+ countries — no jargon, pure wisdom.",
+    features:["19 timeless money lessons","Bestseller in 60+ countries","Accessible to everyone","Great gift for young professionals"],
+    specs:[["Author","Morgan Housel"],["Publisher","Jaico Publishing"],["Pages","256"],["Format","Paperback"],["Language","English"]]
+  },
+  { id:6,  name:"Under Armour Men's Running Shorts — Quick Dry", brand:"Under Armour", price:1299, mrp:2499, rating:4.5, reviews:5621, cat:["fashion","sports","shoes"],
+    img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120","https://images.unsplash.com/photo-1556906781-9a91d8f2e934?w=120","https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=120"],
+    prime:true, deal:true,
+    description:"HeatGear fabric wicks sweat and dries ultra-fast. Anti-odour technology. 4-way stretch for full range of motion.",
+    features:["HeatGear fabric — quick dry","Anti-odour technology","4-way stretch","7-inch inseam, zip pockets","Sizes S–XXL"],
+    specs:[["Brand","Under Armour"],["Material","96% Polyester, 4% Elastane"],["Fit","Loose"],["Inseam","7 inch"],["Sizes","S, M, L, XL, XXL"]]
+  },
+  { id:7,  name:"ONLY Women's Floral Midi Dress — Summer", brand:"ONLY", price:1799, mrp:3999, rating:4.4, reviews:3287, cat:["fashion"],
+    img:"https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=120","https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=120","https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=120"],
+    prime:true, deal:false,
+    description:"Breezy floral midi dress in 100% viscose. V-neckline, puff sleeves, tie-waist belt. Perfect for summer outings.",
+    features:["100% viscose — breathable","V-neckline, short puff sleeves","Tie-waist belt","6 print options, Sizes XS–XXL"],
+    specs:[["Brand","ONLY"],["Material","100% Viscose"],["Fit","Regular A-line"],["Length","Midi"],["Sizes","XS–XXL"]]
+  },
+  { id:8,  name:"Instant Pot Duo 7-in-1 Pressure Cooker 6L", brand:"Instant Pot", price:6990, mrp:12999, rating:4.7, reviews:67432, cat:["kitchen","home"],
+    img:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=120","https://images.unsplash.com/photo-1585325701956-60dd9c8553bc?w=120","https://images.unsplash.com/photo-1612392061787-2d4bfce9e0e4?w=120"],
+    prime:true, deal:true,
+    description:"Replace 7 kitchen appliances — pressure cooker, slow cooker, rice cooker, steamer, sauté, yogurt maker, warmer. Cooks 70% faster.",
+    features:["7-in-1 multi-cooker","Cooks 70% faster","6L stainless steel pot","13 smart programs","Dishwasher-safe parts","10 safety mechanisms"],
+    specs:[["Brand","Instant Pot"],["Capacity","6 Litres"],["Wattage","1000 W"],["Programs","13 smart"],["Warranty","1 year"]]
+  },
+  { id:9,  name:"Philips Air Fryer HD9252 Rapid Air 4.1L", brand:"Philips", price:8499, mrp:12995, rating:4.6, reviews:31245, cat:["kitchen","home"],
+    img:"https://images.unsplash.com/photo-1648001353597-c65e20aafe03?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1648001353597-c65e20aafe03?w=120","https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=120","https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=120"],
+    prime:true, deal:false,
+    description:"Up to 90% less fat using Rapid Air Technology. 4.1L capacity for 4 servings. 7 pre-set programs, dishwasher-safe.",
+    features:["90% less fat vs deep frying","4.1L — serves 4","7 pre-set programs","80–200°C temperature range","Dishwasher-safe parts"],
+    specs:[["Brand","Philips"],["Capacity","4.1 L"],["Wattage","1400 W"],["Temperature","80–200°C"],["Warranty","2 years"]]
+  },
+  { id:10, name:"Cosco Hex Dumbbell Set 5–25 kg with Rack", brand:"Cosco", price:8999, mrp:15000, rating:4.7, reviews:12034, cat:["sports","fitness"],
+    img:"https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120","https://images.unsplash.com/photo-1584466977773-e625c37cdd50?w=120","https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=120"],
+    prime:true, deal:false,
+    description:"5 pairs of rubber hex dumbbells (5–25 kg) plus a free-standing A-frame rack. Anti-slip knurled handles. Floor-safe rubber ends.",
+    features:["5 pairs: 5, 10, 15, 20, 25 kg","Rubber hex ends — no rolling","Knurled chrome handles","A-frame rack included"],
+    specs:[["Brand","Cosco"],["Range","5–25 kg"],["Pairs","5"],["Coating","Rubber Hex"],["Warranty","1 year"]]
+  },
+  { id:11, name:"LEGO Technic Bugatti Chiron 3599-Piece Set", brand:"LEGO", price:24999, mrp:34999, rating:4.9, reviews:8921, cat:["toys","games"],
+    img:"https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=120","https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=120","https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=120"],
+    prime:true, deal:false,
+    description:"1:8 scale Bugatti Chiron replica. W16 engine with moving pistons, 8-speed gearbox with paddle shift, monocoque chassis. Ages 16+.",
+    features:["3,599 pieces, 1:8 scale","W16 engine with 8 moving pistons","8-speed dual-clutch gearbox","Aerodynamic working details","Collectible Bugatti booklet"],
+    specs:[["Brand","LEGO"],["Theme","Technic"],["Pieces","3,599"],["Age","16+"],["Scale","1:8"],["Dimensions","14×56×24 cm"]]
+  },
+  { id:12, name:"Amazon Fire TV Stick 4K Max — Wi-Fi 6E", brand:"Amazon", price:4499, mrp:6999, rating:4.7, reviews:102345, cat:["electronics","audio","accessories"],
+    img:"https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=120","https://images.unsplash.com/photo-1461151304267-38535e780c79?w=120","https://images.unsplash.com/photo-1555186960-02e1c70ef6fd?w=120"],
+    prime:true, deal:true,
+    description:"4K Ultra HD, Dolby Vision, HDR10+, Dolby Atmos. Wi-Fi 6E for 2.4× faster streaming. Hands-free Alexa remote.",
+    features:["4K Ultra HD + Dolby Vision + HDR10+","Wi-Fi 6E — 2.4× faster","Dolby Atmos audio","Alexa hands-free remote","1.8 GHz quad-core, 2GB RAM"],
+    specs:[["Brand","Amazon"],["Resolution","4K Ultra HD"],["HDR","Dolby Vision, HDR10+"],["Audio","Dolby Atmos"],["Wi-Fi","Wi-Fi 6E"],["Processor","1.8 GHz quad-core"]]
+  },
+  { id:13, name:"Fossil Gen 6 Smartwatch 44mm", brand:"Fossil", price:19495, mrp:27995, rating:4.4, reviews:6780, cat:["watches","accessories","electronics"],
+    img:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120","https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=120","https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=120"],
+    prime:true, deal:false,
+    description:"Fossil Gen 6 runs Wear OS 3 with Google Assistant, Google Pay, and Play Store. Snapdragon 4100+ chip for faster performance.",
+    features:["Wear OS 3 with Google Assistant","Snapdragon 4100+ processor","GPS, heart rate, SpO2 sensor","1.28-inch AMOLED touchscreen","3-day battery with rapid charging","5ATM water resistant"],
+    specs:[["Brand","Fossil"],["OS","Wear OS 3"],["Processor","Snapdragon 4100+"],["Display","1.28-inch AMOLED"],["Battery","3 days"],["Water Resistance","5ATM"]]
+  },
+  { id:14, name:"Puma Men's Running Shoes Velocity Nitro", brand:"Puma", price:5999, mrp:9999, rating:4.5, reviews:11234, cat:["shoes","fashion","sports"],
+    img:"https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=120","https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120","https://images.unsplash.com/photo-1556906781-9a91d8f2e934?w=120"],
+    prime:true, deal:true,
+    description:"NITRO foam midsole for lightweight energy return. Engineered mesh upper for breathability. Designed for daily training and long runs.",
+    features:["NITRO foam midsole — lightweight","Engineered mesh upper","PUMAGRIP outsole traction","Sizes 6–11 UK","Available in 5 colourways"],
+    specs:[["Brand","Puma"],["Type","Running Shoes"],["Midsole","NITRO Foam"],["Upper","Engineered Mesh"],["Closure","Lace-up"],["Sizes","UK 6–11"]]
+  },
+  { id:15, name:"Malabar Gold 22KT Bangles — Pair", brand:"Malabar Gold", price:42000, mrp:45000, rating:4.8, reviews:2134, cat:["jewellery"],
+    img:"https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=120","https://images.unsplash.com/photo-1573408301185-9519f94816f7?w=120","https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=120"],
+    prime:false, deal:false,
+    description:"22KT hallmarked gold bangles in a traditional design. BIS certified. Comes in a premium gift box. Available in sizes 2.4–2.8.",
+    features:["22KT BIS hallmarked gold","Traditional engraved pattern","Available sizes: 2.4, 2.6, 2.8","Premium gift packaging","30-day easy returns"],
+    specs:[["Brand","Malabar Gold"],["Purity","22 KT (916)"],["Certification","BIS Hallmark"],["Weight","Approx. 12g/pair"],["Available Sizes","2.4, 2.6, 2.8"]]
+  },
+  { id:16, name:"IKEA KALLAX Shelf Unit — White 77×77cm", brand:"IKEA", price:3999, mrp:5499, rating:4.6, reviews:18943, cat:["furniture","home"],
+    img:"https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80",
+    thumbs:["https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=120","https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=120","https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=120"],
+    prime:true, deal:false,
+    description:"Versatile shelf unit — can be used freestanding, mounted on the wall or as a room divider. Each compartment supports 13 kg.",
+    features:["77×77 cm — 4 square compartments","Freestanding or wall-mounted","Each compartment: 13 kg max","Compatible with KALLAX inserts","Easy assembly, all hardware included"],
+    specs:[["Brand","IKEA"],["Series","KALLAX"],["Dimensions","77×39×77 cm"],["Material","Particleboard"],["Colour","White"],["Max Load per Compartment","13 kg"]]
+  }
+];
+
+/* ──────────────────── STATE ──────────────────── */
+let cart = [];
+let prevPage = 'featured'; // 'featured' | 'listing'
+let currentListingCat = 'all';
+
+/* ──────────────────── HELPERS ──────────────────── */
+function fmt(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+function discPct(p) { return Math.round((1 - p.price / p.mrp) * 100); }
+function stars(r) {
+  const f = Math.floor(r), h = r % 1 >= 0.5 ? 1 : 0;
+  return '★'.repeat(f) + (h ? '½' : '') + '☆'.repeat(5 - f - h);
+}
+function cardHTML(p) {
+  return `
+    <div class="col-6 col-sm-4 col-md-3">
+      <div class="cat-card" onclick="openProduct(${p.id})">
+        <img src="${p.img}" alt="${p.name}" loading="lazy" style="height:170px;object-fit:cover;width:100%;"/>
+        <div class="cat-card-body">
+          ${p.deal ? '<span class="cat-badge badge-sale">Deal</span>' : ''}
+          <div class="cat-name" style="font-size:13px;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;">${p.name}</div>
+          <div class="cat-sub">${p.brand}</div>
+          <div style="color:#ff9900;font-size:12px;">${stars(p.rating)} <span style="color:#007185;">${p.reviews.toLocaleString()}</span></div>
+          <div style="margin-top:5px;">
+            <span style="font-size:16px;font-weight:700;color:#0f1111;">${fmt(p.price)}</span>
+            <span style="font-size:11px;color:#888;text-decoration:line-through;margin-left:5px;">${fmt(p.mrp)}</span>
+            <span style="font-size:11px;color:#cc0c39;font-weight:600;margin-left:3px;">${discPct(p)}% off</span>
+          </div>
+          ${p.prime ? '<div style="margin-top:4px;"><span style="background:#00a8e1;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;">prime</span> <span style="font-size:10px;color:#007185;">FREE delivery</span></div>' : ''}
+          <button class="btn btn-warning btn-sm w-100 mt-2 rounded-pill fw-bold" style="font-size:12px;background:#ff9900;border:none;color:#131921;" onclick="event.stopPropagation();addToCart(${p.id});showToast()">Add to Cart</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ──────────────────── NAVIGATION ──────────────────── */
+function showCategory(cat) {
+  currentListingCat = cat;
+  prevPage = 'listing';
+  const catLabels = {
+    all:'All Products', phones:'Phones', laptops:'Laptops & Computers',
+    fashion:'Clothes & Fashion', electronics:'Electronics', furniture:'Furniture & Storage',
+    sports:'Fitness & Sports', books:'Books', audio:'Audio & Accessories',
+    home:'Pillow & Bedding', shoes:'Shoes & Socks', watches:'Watches',
+    jewellery:'Jewellery', accessories:'Accessories & Tech', kitchen:'Home & Kitchen',
+    toys:'Games & Fun', games:'Games & Fun', fitness:'Fitness & Sports'
+  };
+  const filtered = cat === 'all' ? products : products.filter(p => p.cat.includes(cat));
+  document.getElementById('listingTitle').textContent = catLabels[cat] || cat;
+  document.getElementById('productGrid').innerHTML = filtered.length
+    ? filtered.map(cardHTML).join('')
+    : '<div class="col-12 text-center text-muted py-5">No products found in this category.</div>';
+  document.getElementById('featuredSection').style.display = 'none';
+  document.getElementById('productListing').style.display = 'block';
+  document.getElementById('searchResults').style.display = 'none';
+  window.scrollTo(0,0);
+}
+
+function backToFeatured() {
+  document.getElementById('featuredSection').style.display = 'block';
+  document.getElementById('productListing').style.display = 'none';
+  document.getElementById('searchResults').style.display = 'none';
+}
+
+function setDept(btn, cat) {
+  document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (cat === 'all') {
+    backToFeatured();
+  } else {
+    showCategory(cat);
+  }
+}
+
+function liveSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) {
+    document.getElementById('searchResults').style.display = 'none';
+    if (document.getElementById('productListing').style.display === 'none' && document.getElementById('featuredSection').style.display !== 'none') return;
+    return;
+  }
+  const matched = products.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+  document.getElementById('searchGrid').innerHTML = matched.length
+    ? matched.map(cardHTML).join('')
+    : '<div class="col-12 text-center text-muted py-5">No results found.</div>';
+  document.getElementById('searchResults').style.display = 'block';
+  document.getElementById('featuredSection').style.display = 'none';
+  document.getElementById('productListing').style.display = 'none';
+}
+
+function goHome() {
+  document.getElementById('detailPage').style.display = 'none';
+  document.getElementById('homePage').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function goBackFromDetail() {
+  document.getElementById('detailPage').style.display = 'none';
+  document.getElementById('homePage').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+/* ──────────────────── DETAIL PAGE ──────────────────── */
+function openProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const d = discPct(p);
+  document.getElementById('detailTop').innerHTML = `
+    <div class="detail-img-box">
+      <img class="detail-main-img" id="mainImg" src="${p.img}" alt="${p.name}"/>
+      <div class="detail-thumb-row">
+        ${p.thumbs.map((t,i) => `<img class="detail-thumb ${i===0?'sel':''}" src="${t}" onclick="switchImg('${t}',this)"/>`).join('')}
+      </div>
+    </div>
+    <div class="detail-center">
+      <div class="detail-card">
+        <div class="detail-title">${p.name}</div>
+        <div class="detail-brand">by <span style="color:#007185;font-weight:600;">${p.brand}</span></div>
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <span class="detail-stars">${stars(p.rating)}</span>
+          <span class="detail-rev">${p.reviews.toLocaleString()} ratings</span>
+        </div>
+        <div class="mt-3 pt-2" style="border-top:1px solid #eee;">
+          <span class="detail-price">${fmt(p.price)}</span>
+          <span class="detail-mrp">${fmt(p.mrp)}</span>
+          <span class="detail-disc">${d}% off</span>
+          <div style="font-size:12px;color:#888;margin-top:3px;">Inclusive of all taxes. Free Returns.</div>
+        </div>
+        ${p.prime ? `<div class="detail-prime-pill"><span class="detail-prime-b">prime</span>FREE delivery <strong>tomorrow</strong> if ordered in 3 hrs</div>` : ''}
+        ${p.deal ? `<div class="mt-2"><span style="background:#cc0c39;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;">Deal of the Day</span></div>` : ''}
+      </div>
+      <div class="detail-card">
+        <div style="font-size:13px;font-weight:700;color:#0f1111;margin-bottom:8px;">Product Highlights</div>
+        <ul style="padding-left:18px;margin:0;">${p.features.map(f=>`<li style="font-size:13px;color:#333;margin-bottom:5px;line-height:1.5;">${f}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="detail-buy-card">
+      <div style="font-size:22px;font-weight:700;color:#0f1111;margin-bottom:3px;">${fmt(p.price)}</div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px;">+ ₹0 delivery charges</div>
+      <div style="color:#007600;font-size:15px;font-weight:600;margin-bottom:10px;">&#10003; In Stock</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <label style="font-size:13px;color:#555;">Qty:</label>
+        <select style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;">
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+      <button class="detail-buy-btn" onclick="buyNow(${p.id})">Buy Now</button>
+      <button class="detail-cart-btn" onclick="addToCart(${p.id});showToast()">Add to Cart</button>
+      <div style="font-size:12px;color:#555;text-align:center;margin-top:10px;">&#128274; Secure transaction</div>
+      <div style="margin-top:12px;font-size:12px;color:#555;line-height:1.8;">
+        <div><strong>Ships from:</strong> Amazon.in</div>
+        <div><strong>Sold by:</strong> ${p.brand} India</div>
+        <div><strong>Returns:</strong> Eligible within 30 days</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('detailBottom').innerHTML = `
+    <div class="detail-specs-card">
+      <h3>Technical Specifications</h3>
+      ${p.specs.map(([k,v])=>`<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`).join('')}
+    </div>
+    <div class="detail-desc-card">
+      <h3>About This Product</h3>
+      <p>${p.description}</p>
+      <ul>${p.features.map(f=>`<li>${f}</li>`).join('')}</ul>
+    </div>
+  `;
+  document.getElementById('homePage').style.display = 'none';
+  document.getElementById('detailPage').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function switchImg(src, el) {
+  document.getElementById('mainImg').src = src;
+  document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+/* ──────────────────── CART ──────────────────── */
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+  const ex = cart.find(x => x.id === id);
+  if (ex) ex.qty++; else cart.push({...p, qty:1});
+  updateCartUI();
+}
+function removeFromCart(id) {
+  cart = cart.filter(x => x.id !== id);
+  updateCartUI();
+}
+function buyNow(id) {
+  addToCart(id);
+  updateCartUI();
+  document.getElementById('cartSidebar').classList.add('open');
+}
+function updateCartUI() {
+  const total = cart.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('cartCount').textContent = total;
+  const el = document.getElementById('cartItems');
+  if (!cart.length) {
+    el.innerHTML = '<div style="color:#888;font-size:13px;text-align:center;padding:20px;">Your cart is empty</div>';
+    document.getElementById('cartTotal').textContent = '';
+    return;
+  }
+  el.innerHTML = cart.map(c=>`
+    <div class="cart-item">
+      <img src="${c.img}" alt="${c.name}"/>
+      <div class="flex-fill">
+        <div class="cart-item-name">${c.name.slice(0,42)}...</div>
+        <div class="cart-item-price">${fmt(c.price)} × ${c.qty}</div>
+        <button class="cart-remove" onclick="removeFromCart(${c.id})">Remove</button>
+      </div>
+    </div>`).join('');
+  const tot = cart.reduce((s,x)=>s+x.price*x.qty,0);
+  document.getElementById('cartTotal').textContent = `Subtotal (${total} item${total>1?'s':''}): ${fmt(tot)}`;
+}
+function toggleCart() {
+  document.getElementById('cartSidebar').classList.toggle('open');
+  updateCartUI();
+}
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+function checkout() {
+  if (!cart.length) return;
+  const tot = cart.reduce((s,x)=>s+x.price*x.qty,0);
+  document.getElementById('cartItems').innerHTML = `<div style="text-align:center;padding:20px;color:#555;font-size:13px;">&#10003; Order placed!<br><strong>${fmt(tot)}</strong> charged.<br><br>Thank you for shopping on Amazon.in!</div>`;
+  document.getElementById('cartTotal').textContent='';
+  cart=[];
+  document.getElementById('cartCount').textContent='0';
+}
+
+updateCartUI();
+</script>
+<footer>
+    <div class="foot-logo">
+     <div class="amz-logo" onclick="goHome()">ama<span>z</span>on.in</div>
+  </div>
+
+</footer>
+</body>
+</html>
